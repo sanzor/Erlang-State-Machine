@@ -2,43 +2,48 @@
 -record(state,{
     current="None",
     intvCount=0,
-    jobCount=0,
-    monitor
+    jobCount=0
 }).
--export([init/1,start/0]).
+-export([init/1,start/0,callback_mode/0]).
 -export([hire/2,fire/1,interview/2]).
+
+-export([sitting_home/3,interviewing/3,working/3]).
+
 
 -behaviour(gen_statem).
 
 
-start()->
-    gen_statem:start(?MODULE,[self()],[]).
+callback_mode() ->
+    state_functions.
 
-init(Monitor)->
-    {ok,sitting_home,#state{current="None",jobCount=0,intvCount=0,monitor=Monitor}}.
+start() ->
+    gen_statem:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-sitting_home({intv,Company},State=#state{intvCount=C,monitor=M})->
-     gen_statem:reply(M,"Got an interview from:"++Company++" going interviewing"),
+init([])->
+    {ok,sitting_home,#state{current="None",jobCount=0,intvCount=0}}.
+
+sitting_home({call,From},{intv,Company},State=#state{intvCount=C})->
+     gen_statem:reply(From,"Got an interview from:"++Company++" going interviewing"),
      {next_state,interviewing,State#state{intvCount=C+1}};
-sitting_home(Event,State)->
-     gen_statem:reply(State#state.monitor,{unexpected , Event}),
+sitting_home({call,From},Event,State)->
+     gen_statem:reply(From,{unexpected , Event}),
      {next_state,sitting_home,State}.
 
-interviewing({rejected,Company},State)->
-    gen_statem:reply("Booh got rejected by :"++ Company),
+interviewing({call,From},{rejected,Company},State)->
+    gen_statem:reply(From,"Booh got rejected by :"++ Company),
     {next_state,sitting_home,State};
-interviewing({accepted,Company},State=#state{jobCount=J})->
-    gen_statem:reply("Hooray got accepted"),
+interviewing({call,From},{accepted,Company},State=#state{jobCount=J})->
+    gen_statem:reply(From,"Hooray got accepted"),
     {next_state,working,State#state{jobCount=J+1,current=Company}};
-interviewing(_,State)->
-    gen_statem:reply("Unknown message"),
+interviewing({call,From},_,State)->
+    gen_statem:reply(From,"Unknown message"),
     {next_state,interviewing,State}.
 
 
-working(fire,State=#state{current=C})->
+working({call,From},fire,State=#state{current=C})->
     gen_statem:reply("Unexpected event"),
     {next_state,working,State#state{current="None"}};
-working(Event,State)->
+working({call,From},Event,State)->
         gen_statem:reply("Unexpected event"),
         {next_state,working,State}.
 
