@@ -13,15 +13,12 @@
 
 -behaviour(gen_statem).
 
-something("Adrian",tu)->
-    {amount,300};
-something(_,_)->
-    {33.5}.
-
+%mandatory
 
 callback_mode() ->
     state_functions.
-
+init([])->
+    {ok,sitting_home,#state{current="None",}}.
 start() ->
     gen_statem:start_link({local, ?MODULE}, ?MODULE, [], []).
 
