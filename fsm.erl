@@ -4,13 +4,19 @@
     intvCount=0,
     jobCount=0
 }).
--export([init/1,start/0,callback_mode/0]).
+-export([init/1,start/0,callback_mode/0,something/2]).
 -export([hire/2,fire/1,interview/2]).
 
 -export([sitting_home/3,interviewing/3,working/3]).
 
 
+
 -behaviour(gen_statem).
+
+something("Adrian",tu)->
+    {amount,300};
+something(_,_)->
+    {33.5}.
 
 
 callback_mode() ->
