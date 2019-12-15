@@ -9,6 +9,7 @@
 -export([state/1,start/0,hire/2,fire/2,interview/2]).
 
 -export([sitting_home/3,interviewing/3,working/3]).
+-export([handle_event/4]).
 
 -behaviour(gen_statem).
 
@@ -16,13 +17,13 @@
 start()->
     gen_statem:start_link(?MODULE,[],[]).
 state(PID)->
-    gen_statem:call(PID,state,0).
+    gen_statem:call(PID,state).
 hire(PID,Company)->
-    gen_statem:call(PID,{hire,Company},0).
+    gen_statem:call(PID,{hire,Company}).
 fire(PID,Company)->
-    gen_statem:call(PID,{fire,Company},0).
+    gen_statem:call(PID,{fire,Company}).
 interview(PID,Company)->
-    gen_state:call(PID,{intv,Company},0).
+    gen_statem:call(PID,{intv,Company}).
 
 %mandatory
 code_change(V,State,Data,Extra)->{ok,State,Data}.
@@ -34,16 +35,16 @@ terminate(Reasom,State,Data)->
     void.
 
 % Generic handlers
-handle_event({call,From},state,State)->
-    {keep_state,State,[{reply,From,State}]};
-handle_event(_,_,State)->
+handle_event({call,From},state,State,Data)->
+    {keep_state,State,[{reply,From,Data}]};
+handle_event(_,_,State,Data)->
     {keep_state,State}.
 
 % State implementations
 sitting_home({call,From},{intv,Company},State=#state{intvCount=C})->
-     {next_state,interviewing,State#state{intvCount=C+1},[{reply,From,"Interviewing by:"++Company}]};
+    {next_state,interviewing,State#state{intvCount=C+1},[{reply,From,"Interviewing..."}]};
 sitting_home(EventType,Event,State)->
-     handle_event(EventType,Event,State).
+    handle_event(EventType,Event,State,[]).
 interviewing({call,From},{rejected,Company},State)->
     {next_state,sitting_home,State,[{reply,From,"rejected by:"++Company}]};
 interviewing({call,From},{accepted,Company},State=#state{jobCount=J})->
@@ -53,13 +54,13 @@ interviewing({call,From},{accepted,Company},State=#state{jobCount=J})->
     [{reply,From,"accepted offer from:"++Company}]
 };
 interviewing(EventType,Event,State)->
-    handle_event(EventType,Event,State).
+    handle_event(EventType,Event,State,[]).
 
 
 working({call,From},{fire,Company},State=#state{current=C})->
     {next_state,working,State#state{current="None"},[{reply,From,"Got fired from"++Company}]};
 working(EventType,Event,State)->
-      handle_event(EventType,Event,State).
+      handle_event(EventType,Event,State,[]).
 
 
 
