@@ -1,0 +1,1 @@
+f(),c("D:/Erlang/EFMachine/fsm.erl"),{ok,Pid}=fsm:start(),fsm:state(Pid).
