@@ -18,12 +18,6 @@ start()->
 state(PID)->
     gen_statem:call(PID,get_state).
 
-handle_event({call,From},get_state,Data)->
-    gen_statem:reply(From,Data);
-    
-handle_event(_,_,Data)->
-    {keep_state,Data}.
-
 interview(PID,Company)->
     gen_statem:call(PID,{intv,Company}).
 reject(PID,Company)->
@@ -43,17 +37,27 @@ terminate(Reasom,State,Data)->
 % State implementations
 
 sitting_home({call,From},{intv,Company},Data=#data{intvCount=C})->
-    gen_statem:reply(From,Data),
+    gen_statem:reply(From,{got_interview,Company}),
     {next_state,interviewing,Data#data{intvCount=C+1}};
-sitting_home(V,Event,Data)->
-    handle_event(V,Event,Data);
+sitting_home(EventType,Event,Data)->
+    handle_event(EventType,Event,Data).
 
 interviewing({call,From},{rejected,Company},Data)->
-    gen_statem:reply(From,Data),
+    gen_statem:reply(From,{got_rejected,Company}),
     {next_state,sitting_home,Data}};
-interviewing(V,wait,Data)->
-    handle_event(V,Event,Data);
+interviewing(EventType,Event,Data)->
+    handle(EventType,nada,Data);
+interviewing({call,From},state,Data)->
+    handle({call,From},)
 
+handle({call,From},state,Data)->
+    gen_statem:reply(From,Data),
+    {keep_state,Data};
+handle(EventType,EventContent,Data)->
+    {keep_state,Data}.
+getState(From,State,Data)->
+    gen_statem(From,{State,Data}),
+    {keep_state,Data}
 
 
 
