@@ -3,11 +3,11 @@
     current="None",
     intvCount=0,
     jobCount=0,
-    state="None"
+    positions=[]
 }).
 -export([init/1,terminate/3,callback_mode/0,code_change/4]).
 
--export([state/1,start/0,interview/2,reject/2,wait/1]).
+-export([state/1,start/0,interview/2,reject/2,accept/2,fire/2,promote/2]).
 
 -export([sitting_home/3,interviewing/3]).
 -export([handle/3]).
@@ -23,8 +23,12 @@ interview(PID,Company)->
     gen_statem:call(PID,{intv,Company}).
 reject(PID,Company)->
     gen_statem:call(PID,{reject,Company}).
-wait(PID)->
-    gen_statem:call(PID,{wait}).
+accept(PID,Company)->
+    gen_statem:call(PID,{accept,Company}).
+fire(PID,Company)->
+    gen_statem:call(PID,{fired,Company}).
+promote(PID,Title)->
+    gen_statem:call(PID,{promoted,Title}).
 
 %mandatory
 code_change(V,State,Data,Extra)->{ok,State,Data}.
@@ -43,10 +47,18 @@ sitting_home(EventType,Event,Data)->
     handle(EventType,Event,Data).
 
 interviewing({call,From},{rejected,Company},Data)->
-    {next_state,interviewing,Data,[{reply,From,{rejected,Company}}]};
+    {next_state,sitting_home,Data,[{reply,From,{rejected,Company}}]};
+interviewing({call,From},{accepted,Company},Data=#data{jobCount=J,positions=P})->
+    {next_state,working,Data#data{current=Company,jobCount=J+1,positions=[{"fresh_hire",Company}|P]},[{reply,From,{accepted,Company}}]};
 interviewing(EventType,Event,Data)->
     handle(EventType,Event,Data).
 
+working({call,From},{promoted,Title},Data=#data{positions=L,current=C})->
+    {keep_state,Data#data{positions=[{Title,C}|L]},{reply,From,{promoted_by,C,Title}}};
+working({call,From},fired,Data=#data{positions=L,current=C})->
+    {next_state,sitting_home,Data#data{current="None"},{reply,From,{fired,C}}};
+working(EventType,Event,Data)->
+    handle(EventType,Event,Data).
 
 handle({call,From},state,Data)->
     {keep_state,Data,[{reply,From,Data}]};

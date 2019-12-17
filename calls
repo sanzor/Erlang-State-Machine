@@ -1,2 +1,2 @@
-f(),c("D:/Erlang/EFMachine/fsm.erl"),{ok,Pid}=fsm:start().
+f(),c("C:/Erlang/Genserv/fsm.erl"),{ok,Pid}=fsm:start().
 fsm:state(Pid).
