@@ -9,7 +9,7 @@
 
 -export([state/1,start/0,interview/2,reject/2,accept/2,fire/2,promote/2]).
 
--export([sitting_home/3,interviewing/3]).
+-export([sitting_home/3,interviewing/3,working/3]).
 -export([handle/3]).
 -behaviour(gen_statem).
 
@@ -22,9 +22,9 @@ state(PID)->
 interview(PID,Company)->
     gen_statem:call(PID,{intv,Company}).
 reject(PID,Company)->
-    gen_statem:call(PID,{reject,Company}).
+    gen_statem:call(PID,{rejected,Company}).
 accept(PID,Company)->
-    gen_statem:call(PID,{accept,Company}).
+    gen_statem:call(PID,{accepted,Company}).
 fire(PID,Company)->
     gen_statem:call(PID,{fired,Company}).
 promote(PID,Title)->
