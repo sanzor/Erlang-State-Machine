@@ -7,9 +7,9 @@
 }).
 -export([init/1,terminate/3,callback_mode/0,code_change/4]).
 
--export([state/1,start/0,interview/2,reject/2,accept/2,fire/2,promote/2]).
+-export([state/1,start/0,interview/2,reject/2,accept/2,fire/1,promote/2]).
 
--export([sitting_home/3,interviewing/3]).
+-export([sitting_home/3,interviewing/3,working/3,test/0]).
 -export([handle/3]).
 -behaviour(gen_statem).
 
@@ -22,11 +22,11 @@ state(PID)->
 interview(PID,Company)->
     gen_statem:call(PID,{intv,Company}).
 reject(PID,Company)->
-    gen_statem:call(PID,{reject,Company}).
+    gen_statem:call(PID,{rejected,Company}).
 accept(PID,Company)->
-    gen_statem:call(PID,{accept,Company}).
-fire(PID,Company)->
-    gen_statem:call(PID,{fired,Company}).
+    gen_statem:call(PID,{accepted,Company}).
+fire(PID)->
+    gen_statem:call(PID,fired).
 promote(PID,Title)->
     gen_statem:call(PID,{promoted,Title}).
 
@@ -69,7 +69,13 @@ handle(_,State,Data)->
 
 
 
-
+test()->
+    receive
+        {msg,From,hi}->From ! got_it,
+                         test();
+        {msg,From,Dat}->From ! wrong,
+             test()
+    end.
 
 
 
