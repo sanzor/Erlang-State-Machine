@@ -20,7 +20,8 @@ handle_info(_, State) -> {ok, State}.
 
 start()->
     {ok,Pid}=gen_event:start_link({local,?MODULE}),
-    gen_event:add_handler(Pid,some_handler,[]),
+    Ref=make_ref(),
+    gen_event:add_handler(Pid,{hev,Ref},[]),
     Pid.
 append(Pid,Elem)->
     gen_event:notify(Pid,{append,Elem}).
@@ -38,11 +39,9 @@ handle_event(drop,State=#state{xs=XS})->
         []->{ok,State};
         [H|T]->{ok,State#state{xs=T}}
     end.
-handle_call({call,From},State)->
+
+handle_call(state,State)->
     {ok,State,State};
-handle_call({append_sync,Elem},State=#state{xs=XS})->
-    Newxs=[Elem|XS],
-    {ok,Newxs,State#state{xs=Newxs}};
 handle_call(Event,State)->
     {ok,nada_for_you,State}.
     
