@@ -1,4 +1,4 @@
--module(hev).
+-module(h1).
 -export([start/0,append/2,drop/1,state/1]).
 -export([init/1,terminate/2,code_change/3,handle_call/2,handle_event/2]).
 -record(state,{
@@ -21,14 +21,14 @@ handle_info(_, State) -> {ok, State}.
 start()->
     {ok,Pid}=gen_event:start_link({local,?MODULE}),
     Ref=make_ref(),
-    gen_event:add_handler(Pid,{hev,Ref},[]),
+    gen_event:add_handler(Pid,h1,[]),
     Pid.
 append(Pid,Elem)->
     gen_event:notify(Pid,{append,Elem}).
 drop(Pid)->
     gen_event:notify(Pid,drop).
 state(Pid)->
-    gen_event:call(Pid,state).
+    gen_event:call(Pid,hev,state).
 terminate(Arg,State)->
     ok.
 %
