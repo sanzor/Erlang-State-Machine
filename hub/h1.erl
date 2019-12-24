@@ -1,50 +1,30 @@
 -module(h1).
--export([start/0,append/2,drop/1,state/1]).
--export([init/1,terminate/2,code_change/3,handle_call/2,handle_event/2]).
--record(state,{
-    xs=[]
-}).
 -behaviour(gen_event).
+-record(state,{
+    players
+}).
+-export([init/1]).
 
-%callbacks
+
 init([])->
-    {ok,#state{xs=[1]}}.
+    {ok,#state{names=maps:new()}}.
 
-terminate()->
-    void.
-
-code_change(_OldVsn, State, _Extra) -> {ok, State}.
-handle_info(_, State) -> {ok, State}.
-
-%API
-
-start()->
-    {ok,Pid}=gen_event:start_link({local,?MODULE}),
-    Ref=make_ref(),
-    gen_event:add_handler(Pid,h1,[]),
-    Pid.
-append(Pid,Elem)->
-    gen_event:notify(Pid,{append,Elem}).
-drop(Pid)->
-    gen_event:notify(Pid,drop).
-state(Pid)->
-    gen_event:call(Pid,hev,state).
-terminate(Arg,State)->
-    ok.
-%
-handle_event({append,Elem},State=#state{xs=XS})->
-    {ok,#state{xs=[Elem|XS]}};
-handle_event(drop,State=#state{xs=XS})->
-    case XS of
-        []->{ok,State};
-        [H|T]->{ok,State#state{xs=T}}
+handle_event({add,{K,V}},State)->
+    case maps:is_key(K,State#state.names) of
+        true -> {ok,State};
+        false-> 
+            Team=maps:put(K,V,State#state.names),
+            {ok,State=#state{names=Team}}
+    end.
+handle_event({remove,K},State#state{players=Players})->
+    case maps:is_key(K,Players) of
+        true -> 
+            NewPlayers=maps:remove(K,Players),
+            {ok,State#state{players=NewPlayers}};
+        false->{ok,State}
     end.
 
 handle_call(state,State)->
-    {ok,State,State};
-handle_call(Event,State)->
-    {ok,nada_for_you,State}.
-    
-
+    {ok,State,State}.
 
 
