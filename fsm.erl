@@ -69,15 +69,4 @@ handle(_,State,Data)->
 
 
 
-test()->
-    receive
-        {msg,From,hi}->From ! got_it,
-                         test();
-        {msg,From,Dat}->From ! wrong,
-             test()
-    end.
-
-
-
-
 

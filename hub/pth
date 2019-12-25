@@ -1,0 +1,2 @@
+c("C:/Erlang/Genserv/hub/mgr.erl").
+f(),X=mgr:start(),mgr:addh(h1,X).
