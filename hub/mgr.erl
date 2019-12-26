@@ -15,5 +15,12 @@ add(MPid,K,V)->
 remove(MPid,K,V)->
     gen_event:notify(MPid,{remove,K}).
 
+join(HandlerType,MPid,ToPid)->
+    HandlerId={HandlerType,make_ref()},
+    gen_event:add_handler(MPid,HandlerType,ToPid),
+    HandlerId.
+
+remove()
+
 state(Pid,HType)->
     gen_event:call(Pid,HType,state).

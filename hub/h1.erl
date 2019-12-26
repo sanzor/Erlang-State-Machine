@@ -1,9 +1,10 @@
--module(h0).
+-module(h1).
 
 -behaviour(gen_event).
 -record(state,{
     players,
-    test=0
+    test=0,
+    pid
 }).
 -compile(export_all).
 
