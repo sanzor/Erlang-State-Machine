@@ -2,7 +2,7 @@
 -behaviour(gen_event).
 
 
--behaviour(gen_event).
+-export([init/1]).
 
 -record(state,{
     toPid,
@@ -11,8 +11,12 @@
 
 init(Pid)->
     {ok,#state{toPid=Pid}}.
-handle_event(Event,State=#state{toPid=Pid,messsages=Ms})->
+handle_event(Event,State=#state{toPid=Pid,events=Ms})->
     Pid ! Event,
     Ns=[Event | Ms],
-    {ok,State#state{messages=Ns}}.
+    {ok,State#state{events=Ns}}.
+
+handle_call(show_all,State)->{ok,State#state.events,State}.
+
+    
 
