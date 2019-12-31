@@ -2,7 +2,7 @@
 -behaviour(gen_event).
 
 
--export([init/1]).
+-compile(export_all).
 
 -record(state,{
     toPid,

@@ -1,6 +1,5 @@
 -module(mgr).
-%-import(h1,[init/1]).
--import(hfeed,[init/1]).
+
 -export([start/0,addh/3,add/3,join/3]).
 
 start()->

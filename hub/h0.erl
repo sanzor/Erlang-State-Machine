@@ -6,7 +6,7 @@
     test=0,
     pid
 }).
--compile(export_all).
+
 
 
 
