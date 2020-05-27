@@ -1,5 +1,0 @@
-c("C:/Erlang/Genserv/hub/mgr.erl").
-f(),
-X=mgr:start(),
-mgr:addh(X,hfeed,self()),
-mgr:join(X,hfeed,self()).
